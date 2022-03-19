@@ -5,10 +5,18 @@ const state = {
     opened: Cookies.get('sidebarStatus') ? !!+Cookies.get('sidebarStatus') : true,
     withoutAnimation: false
   },
-  device: 'desktop'
+  device: 'desktop',
+  asyncRoute: false // 未挂载 -> 动态路由标记
+
 }
 
 const mutations = {
+  SET_ASYNCROUTE: state => {
+    state.asyncRoute = true
+  },
+  RESET_ASYNCROUTE: state => {
+    state.asyncRoute = false
+  },
   TOGGLE_SIDEBAR: state => {
     state.sidebar.opened = !state.sidebar.opened
     state.sidebar.withoutAnimation = false

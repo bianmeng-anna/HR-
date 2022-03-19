@@ -109,9 +109,10 @@ export default {
     }
   },
   watch: {
+    // 监测路由对象的改变 页面跳转
     $route: {
       handler: function(route) {
-        this.redirect = route.query && route.query.redirect
+        this.redirect = route.query && route.query.redirect // 未遂地址
       },
       immediate: true
     }
@@ -144,18 +145,21 @@ export default {
           // console.error()函数调用在原地无返回值undefined, => 默认返回undefined给res
 
           const [err, res] = await this.loginActions(this.loginForm)
-          console.log(res)
+          // console.log(res)
           if (err) this.$message.error(err.message)
           else {
             this.$message.success(res.message)
             // this.$store.commit('user/SET_TOKEN', res.data)
+            // 用replace跳转 不用后退
+            this.$router.replace(this.redirect || '/') // this.$router.push('/')
+            // 如果有未遂地址 跳转 没有 跳转首页
           }
           this.loading = false
           // this.$commit('user/',res.data)
 
           // console.log('下面')
         } else {
-          console.log('表单校验失败')
+          // console.log('表单校验失败')
           return false
         }
       })

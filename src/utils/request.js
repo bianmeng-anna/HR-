@@ -1,5 +1,6 @@
 import axios from 'axios'
 import store from '@/store'
+import router from '@/router'
 
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
@@ -23,6 +24,8 @@ service.interceptors.request.use(
     return config
   },
   error => {
+    // 身份过期，后台重返回401，逻辑状态码
+
     return Promise.reject(error)
   }
 )
@@ -35,14 +38,22 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   response => {
     const { success, message } = response.data
-    if (success === false) {
-      return Promise.reject(new Error(message))
+    if (success) {
+      return response.data // 直接返回后端数据, 省略一层data
     } else {
-      return response.data
+      // Message.error(message) // http状态码2xx, 但是逻辑错误
+      return Promise.reject(new Error(message)) // 返回Promise错误的对象
     }
   },
   error => {
-    return Promise.reject(error)
+    if (error && error.response && error.response.status === 401) {
+      // 身份过期，删除所有token，重置vuex，强制跳转登陆页
+      store.commit('user/RESET_STATE')
+      store.commit('user/REMOVE_TOKEN')
+      router.replace(`/login?redirect=${router.currentRoute.fullPath}`)
+    }
+    // console.dir(error)
+    return Promise.reject(error) // 内部会删除本地cookie里的token
   }
 )
 
